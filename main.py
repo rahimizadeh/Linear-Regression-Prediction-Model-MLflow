@@ -14,10 +14,10 @@ if not mlflow.get_experiment_by_name(experiment_name):
 mlflow.set_experiment(experiment_name)
 
 # Training Data
-df = pd.read_csv("./Salary_predict.csv") # Place the dataset in your project folder
+df = pd.read_csv("./Salary_predict.csv") # Place the dataset in your project folder or replace it by its location
 
 # Fix the column selection for X
-X = df[["experience", "age", "interview_score"]]  # Corrected column selection
+X = df[["experience", "age", "interview_score"]]  
 y = df[["Salary"]]
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, y, train_size=0.7, random_state=0)
@@ -29,9 +29,10 @@ mlflow.sklearn.autolog()
 lr = LinearRegression()
 lr.fit(X_train, Y_train)
 
-
 # Print Model Parameters
 print("Model Coefficients (Weights):", lr.coef_)
 print("Model Intercept (Bias):", lr.intercept_)
+# Predicting a test data
+print(X_test.iloc[[0]], lr.predict( X_test.iloc[[0]]))
 
 # mlflow.delete_experiment(experiment_id="948967992832438054")
