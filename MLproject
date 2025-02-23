@@ -1,0 +1,6 @@
+name: Salary Model
+
+entry_points:
+      main:
+           command: "python main.py"
+           
