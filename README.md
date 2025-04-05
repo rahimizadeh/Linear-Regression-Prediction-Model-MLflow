@@ -1,4 +1,4 @@
-🚀 Salary Prediction Model with MLflow (https://mlflow.org/)
+🚀 Linear Regression Prediction Model with MLflow (https://mlflow.org/)
 
 A machine learning project demonstrating Linear Regression for salary prediction, with experiment tracking and model management using MLflow.
 
