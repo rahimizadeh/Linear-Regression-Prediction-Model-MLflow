@@ -1,57 +1,94 @@
-🚀 Linear Regression Prediction Model with MLflow (https://mlflow.org/)
+# Linear Regression Prediction Model with MLflow
 
-A machine learning project demonstrating Linear Regression for salary prediction, with experiment tracking and model management using MLflow.
+A compact machine-learning project that predicts salary from `experience`, `age`, and `interview_score`, while tracking evaluation metrics and the trained model in MLflow.
 
+## Setup
 
-📌 Overview
+```bash
+git clone https://github.com/rahimizadeh/Linear-Regression-Prediction-Model-MLflow.git
+cd Linear-Regression-Prediction-Model-MLflow
+python -m venv .venv
+```
 
-   This project predicts salaries based on three features: Years of Experience, Age, and Interview Score.
+Windows:
 
-   It showcases:
+```bash
+.venv\Scripts\activate
+```
 
-      - MLflow Integration: Track experiments, metrics, and models.
-      - Reproducibility: Use the MLproject file to run the project in a standardized environment.
-      - Best Practices: Proper project structure, logging, and Git workflows.
-   
-🛠️ Tools & Libraries
+macOS/Linux:
 
-      - Python
-      - MLflow (Experiment tracking)
-      - scikit-learn (Linear Regression)
-      - pandas (Data handling)
-   
-🚀 Quick Start
-   1. Install dependencies:
+```bash
+source .venv/bin/activate
+```
 
-      ```bash
+Install dependencies:
 
-      pip install mlflow pandas scikit-learn
-       
-   3. Run the project:
-      ```bash
-         python run.py  
+```bash
+pip install -r requirements.txt
+```
 
-View MLflow UI:
+## Start MLflow
 
-1. Run MLflow like the following command on Powershell or cmd to run mlflow ui on port 8080:
-      ```bash
-   C:\Users\user-name\AppData\Roaming\Python\Python312\Scripts\mlflow server --host 127.0.0.0 --port 8080
-  
-2. Open http://localhost:8080 to explore experiments and Models.
-   
-📊 MLflow Tracking 
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
 
-         MLflow logs:
-         
-            - Parameters: Model configuration. 
-            - Metrics: RMSE, R2 score.
-            - Artifacts: Trained model files and visualizations.     
-📂 Repository Structure
+Open `http://127.0.0.1:8080` in your browser.
 
-      ├── main.py             # Training script  
-      ├── run.py              # MLflow project runner  
-      ├── MLproject           # YAML file for MLflow project configuration  
-      ├── Salary_predict.csv  # Dataset  
-      └── README.md           # Project documentation  
+The training script reads the tracking URI from `MLFLOW_TRACKING_URI`; if it is not set, it defaults to `http://127.0.0.1:8080`.
 
+## Train and evaluate
 
+```bash
+python main.py
+```
+
+The script uses a held-out 30% test split (`random_state=42`) and logs:
+
+- MAE
+- RMSE
+- R²
+- test-split configuration
+- trained scikit-learn model
+
+You can also launch the MLflow Project wrapper:
+
+```bash
+python run.py
+```
+
+## Configuration
+
+Optional environment variables:
+
+```text
+MLFLOW_TRACKING_URI
+MLFLOW_EXPERIMENT_NAME
+DATA_PATH
+```
+
+## Quick verification
+
+```bash
+python -m py_compile main.py run.py
+```
+
+With MLflow running:
+
+```bash
+python main.py
+```
+
+Then open the MLflow UI and confirm that the `Salary_Model` experiment contains `mae`, `rmse`, `r2`, and a model artifact.
+
+## Repository structure
+
+```text
+├── main.py
+├── run.py
+├── MLproject
+├── requirements.txt
+├── Salary_predict.csv
+└── README.md
+```
