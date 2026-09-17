@@ -1,38 +1,64 @@
+"""Train and evaluate a linear-regression salary model with MLflow tracking."""
+
+import os
+
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
-# Set the tracking URI and experiment
-mlflow.set_tracking_uri("http://127.0.0.1:8080")
+TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:8080")
+EXPERIMENT_NAME = os.getenv("MLFLOW_EXPERIMENT_NAME", "Salary_Model")
+DATA_PATH = os.getenv("DATA_PATH", "Salary_predict.csv")
+FEATURES = ["experience", "age", "interview_score"]
+TARGET = "Salary"
 
-# Check if the experiment exists, if not create it
-experiment_name = "Salary_Model"
-if not mlflow.get_experiment_by_name(experiment_name):
-    mlflow.create_experiment(experiment_name)
-mlflow.set_experiment(experiment_name)
 
-# Training Data
-df = pd.read_csv("./Salary_predict.csv") # Place the dataset in your project folder or replace it by its location
+def train_and_evaluate():
+    df = pd.read_csv(DATA_PATH)
+    required = FEATURES + [TARGET]
+    missing = [column for column in required if column not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
 
-# Fix the column selection for X
-X = df[["experience", "age", "interview_score"]]  
-y = df[["Salary"]]
+    X = df[FEATURES]
+    y = df[TARGET]
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.30,
+        random_state=42,
+    )
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, y, train_size=0.7, random_state=0)
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
 
-# Set Auto logging for scikit-learn flavor
-mlflow.sklearn.autolog()
+    metrics = {
+        "mae": mean_absolute_error(y_test, predictions),
+        "rmse": mean_squared_error(y_test, predictions) ** 0.5,
+        "r2": r2_score(y_test, predictions),
+    }
 
-# Train Model
-lr = LinearRegression()
-lr.fit(X_train, Y_train)
+    mlflow.set_tracking_uri(TRACKING_URI)
+    mlflow.set_experiment(EXPERIMENT_NAME)
+    with mlflow.start_run():
+        mlflow.log_param("test_size", 0.30)
+        mlflow.log_param("random_state", 42)
+        mlflow.log_metrics(metrics)
+        mlflow.sklearn.log_model(
+            model,
+            artifact_path="model",
+            input_example=X_train.head(3),
+        )
 
-# Print Model Parameters
-print("Model Coefficients (Weights):", lr.coef_)
-print("Model Intercept (Bias):", lr.intercept_)
-# Predicting a test data
-print(X_test.iloc[[0]], lr.predict( X_test.iloc[[0]]))
+    print("Model coefficients:", dict(zip(FEATURES, model.coef_)))
+    print("Intercept:", model.intercept_)
+    print({name: round(value, 4) for name, value in metrics.items()})
+    return model, metrics
 
-# mlflow.delete_experiment(experiment_id="948967992832438054")
+
+if __name__ == "__main__":
+    train_and_evaluate()
